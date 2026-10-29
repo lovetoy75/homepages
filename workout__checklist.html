@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3D5AFE">
+<title>오늘의 운동</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1B1F3B; --sub:#6B7194; --bg:#F1F4FF; --card:#fff; --line:#E3E7F8;
+  --blue:#3D5AFE; --coral:#FF5D5D; --sun:#FFB800; --mint:#14C8A0;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit;margin:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{font-family:'Noto Sans KR',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--ink);min-height:100%;padding-bottom:40px}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+.wrap{max-width:480px;margin:0 auto;padding:0 16px}
+
+/* header */
+.top{background:var(--blue);color:#fff;border-radius:0 0 32px 32px;padding:20px 16px 26px;margin:0 -0px}
+.top .wrap{padding:0}
+.month{display:flex;align-items:center;justify-content:space-between}
+.month h1{font-size:22px;font-weight:900;letter-spacing:-.02em}
+.month button{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.18);font-size:20px;font-weight:700;color:#fff}
+.month button:active{background:rgba(255,255,255,.35)}
+.hello{margin-top:6px;font-size:14px;opacity:.85;text-align:center}
+.strip{display:flex;gap:8px;overflow-x:auto;padding:16px 2px 4px;scrollbar-width:none;scroll-snap-type:x proximity}
+.strip::-webkit-scrollbar{display:none}
+.day{flex:0 0 auto;width:50px;padding:8px 0 10px;border-radius:16px;background:rgba(255,255,255,.14);color:#fff;text-align:center;scroll-snap-align:center;position:relative}
+.day small{display:block;font-size:11px;opacity:.8}
+.day b{display:block;font-size:18px;font-weight:700;margin-top:2px}
+.day i{position:absolute;left:50%;bottom:4px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--sun);display:none}
+.day.has i{display:block}
+.day.sel{background:#fff;color:var(--blue)}
+.day.sel small{opacity:.7}
+.day.today:not(.sel){outline:2px solid rgba(255,255,255,.7);outline-offset:-2px}
+
+/* section */
+h2{font-size:17px;font-weight:900;margin:24px 4px 10px;letter-spacing:-.01em}
+.card{background:var(--card);border-radius:22px;padding:16px;box-shadow:0 4px 18px rgba(61,90,254,.08)}
+.row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.row:first-child{padding-top:2px}
+.row:last-child{border-bottom:0;padding-bottom:2px}
+.ico{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;font-size:24px;flex:0 0 auto}
+.info{flex:1;min-width:0}
+.info b{display:block;font-size:16px;font-weight:700}
+.info span{font-size:12px;color:var(--sub)}
+.chk{position:relative;display:block;width:52px;height:52px;flex:0 0 auto;cursor:pointer;margin-right:2px}
+.chk input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}
+.chk span{position:absolute;inset:4px;border-radius:14px;background:var(--bg);border:2.5px solid #C9CFEA;transition:.15s;display:grid;place-items:center}
+.chk span::after{content:"";width:12px;height:22px;border:solid #fff;border-width:0 4px 4px 0;transform:rotate(45deg) scale(0);margin-top:-4px;transition:transform .15s}
+.chk input:checked+span{background:var(--c);border-color:var(--c)}
+.chk input:checked+span::after{transform:rotate(45deg) scale(1)}
+.chk input:active+span{transform:scale(.92)}
+.chk input:focus-visible+span{outline:3px solid var(--ink);outline-offset:2px}
+.step{display:flex;align-items:center;gap:6px}
+.step button{width:44px;height:44px;border-radius:50%;background:var(--bg);font-size:22px;font-weight:700;border:2px solid var(--line)}
+.step button:active{transform:scale(.92)}
+.step label{display:flex;align-items:baseline;justify-content:center;width:64px;gap:2px}
+.step input{width:100%;text-align:center;font:inherit;font-size:22px;font-weight:900;border:0;background:none;color:var(--ink);padding:0;-moz-appearance:textfield;outline:0;border-bottom:2px solid var(--line);border-radius:0}
+.step input:focus{border-bottom-color:var(--blue)}
+.step input::-webkit-outer-spin-button,.step input::-webkit-inner-spin-button{-webkit-appearance:none}
+.step em{font-style:normal;font-size:12px;color:var(--sub);position:absolute;margin-left:56px}
+.unit{font-size:12px;color:var(--sub);width:16px}
+
+/* stats */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{padding:16px;border-radius:22px;color:#fff}
+.stat .n{font-size:38px;font-weight:900;line-height:1.1;letter-spacing:-.03em}
+.stat .n small{font-size:15px;font-weight:700;margin-left:2px}
+.stat .t{font-size:14px;font-weight:700;opacity:.95}
+.dots{display:flex;flex-wrap:wrap;gap:4px;margin-top:12px}
+.dots i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.3)}
+.dots i.f{background:#fff}
+.dots i.c{outline:2px solid #fff;outline-offset:1px}
+
+/* charts */
+.chead{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px}
+.chead b{font-size:15px}
+.chead .tot{font-size:26px;font-weight:900;letter-spacing:-.02em}
+.chead .tot small{font-size:13px;color:var(--sub);font-weight:500;margin-left:2px}
+.chead .meta{font-size:12px;color:var(--sub);text-align:right}
+.bars{display:flex;align-items:flex-end;gap:2px;height:130px;border-bottom:2px solid var(--line)}
+.bar{flex:1;height:100%;display:flex;align-items:flex-end;padding:0;min-width:0}
+.bar span{display:block;width:100%;border-radius:4px 4px 0 0;min-height:3px;background:var(--line);opacity:1;transition:height .35s}
+.bar.v span{background:var(--c)}
+.bar.sel span{outline:2px solid var(--ink);outline-offset:1px}
+.axis{display:flex;gap:2px;margin-top:4px}
+.axis span{flex:1;text-align:center;font-size:9px;color:var(--sub);min-width:0;overflow:visible;white-space:nowrap}
+.tip{min-height:18px;margin-top:8px;font-size:13px;color:var(--sub);text-align:center}
+.foot{margin:28px 4px 0;font-size:12px;color:var(--sub);text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="month">
+    <button id="prev" aria-label="이전 달">‹</button>
+    <h1 id="mtitle"></h1>
+    <button id="next" aria-label="다음 달">›</button>
+  </div>
+  <p class="hello" id="hello"></p>
+  <div class="strip" id="strip"></div>
+</div></header>
+
+<main class="wrap">
+  <h2 id="dtitle"></h2>
+  <section class="card" id="today">
+    <div class="row">
+      <div class="ico" style="background:#E4EAFF">🏊</div>
+      <div class="info"><b>수영</b><span>오늘 했나요?</span></div>
+      <label class="chk" style="--c:var(--blue)"><input type="checkbox" data-k="swim" aria-label="수영 했음"><span></span></label>
+    </div>
+    <div class="row">
+      <div class="ico" style="background:#FFE5E5">🏃</div>
+      <div class="info"><b>달리기</b><span>오늘 달린 거리</span></div>
+      <div class="step">
+        <button data-k="run" data-d="-0.1" aria-label="0.1km 빼기">−</button>
+        <label><input id="in-run" type="number" inputmode="decimal" min="0" step="0.1" placeholder="0"><span class="unit">km</span></label>
+        <button data-k="run" data-d="0.1" aria-label="0.1km 더하기">+</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="ico" style="background:#FFF1CC">💪</div>
+      <div class="info"><b>푸시업</b><span>오늘 한 개수</span></div>
+      <div class="step">
+        <button data-k="push" data-d="-1" aria-label="1개 빼기">−</button>
+        <label><input id="in-push" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><span class="unit">개</span></label>
+        <button data-k="push" data-d="1" aria-label="1개 더하기">+</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="ico" style="background:#D6F6EE">🧗</div>
+      <div class="info"><b>매달리기</b><span>오늘 했나요?</span></div>
+      <label class="chk" style="--c:var(--mint)"><input type="checkbox" data-k="hang" aria-label="매달리기 했음"><span></span></label>
+    </div>
+  </section>
+
+  <h2 id="stitle"></h2>
+  <div class="two">
+    <div class="stat" style="background:var(--blue)">
+      <div class="t">🏊 수영</div>
+      <div class="n"><span id="swimN">0</span><small>일</small></div>
+      <div class="dots" id="swimDots"></div>
+    </div>
+    <div class="stat" style="background:var(--mint)">
+      <div class="t">🧗 매달리기</div>
+      <div class="n"><span id="hangN">0</span><small>일</small></div>
+      <div class="dots" id="hangDots"></div>
+    </div>
+  </div>
+
+  <h2>달리기 기록</h2>
+  <section class="card" style="--c:var(--coral)">
+    <div class="chead">
+      <div class="tot"><span id="runTot">0</span><small>km</small></div>
+      <div class="meta" id="runMeta"></div>
+    </div>
+    <div class="bars" id="runBars"></div>
+    <div class="axis" id="axisR"></div>
+    <div class="tip" id="runTip"></div>
+  </section>
+
+  <h2>푸시업 기록</h2>
+  <section class="card" style="--c:var(--sun)">
+    <div class="chead">
+      <div class="tot"><span id="pushTot">0</span><small>개</small></div>
+      <div class="meta" id="pushMeta"></div>
+    </div>
+    <div class="bars" id="pushBars"></div>
+    <div class="axis" id="axisP"></div>
+    <div class="tip" id="pushTip"></div>
+  </section>
+
+  <p class="foot">기록은 이 기기의 브라우저에 자동 저장돼요.<br>브라우저 데이터를 지우면 기록도 함께 사라져요.</p>
+</main>
+
+<script>
+(function(){
+  var KEY='workout-checklist-v1', WD=['일','월','화','수','목','금','토'];
+  var data={};
+  try{ data=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ data={}; }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(e){} }
+
+  var now=new Date();
+  var ty=now.getFullYear(), tm=now.getMonth(), td=now.getDate();
+  var Y=ty, M=tm, D=td;
+
+  var $=function(id){return document.getElementById(id)};
+  var p2=function(n){return n<10?'0'+n:''+n};
+  var key=function(y,m,d){return y+'-'+p2(m+1)+'-'+p2(d)};
+  var dim=function(y,m){return new Date(y,m+1,0).getDate()};
+  var rec=function(y,m,d){return data[key(y,m,d)]||{}};
+  var fmt=function(n){return (Math.round(n*10)/10).toString()};
+
+  function setRec(k,v){
+    var kk=key(Y,M,D), r=data[kk]||{};
+    r[k]=v;
+    if(!r.swim && !r.hang && !(r.run>0) && !(r.push>0)) delete data[kk]; else data[kk]=r;
+    save(); render(false);
+  }
+
+  function renderStrip(scroll){
+    var s=$('strip'), n=dim(Y,M), h='';
+    for(var d=1; d<=n; d++){
+      var r=rec(Y,M,d), has=r.swim||r.hang||r.run>0||r.push>0;
+      var cls='day'+(d===D?' sel':'')+(Y===ty&&M===tm&&d===td?' today':'')+(has?' has':'');
+      h+='<button class="'+cls+'" data-d="'+d+'"><small>'+WD[new Date(Y,M,d).getDay()]+'</small><b>'+d+'</b><i></i></button>';
+    }
+    s.innerHTML=h;
+    if(scroll){
+      var el=s.querySelector('.sel');
+      if(el) s.scrollLeft=el.offsetLeft-s.clientWidth/2+el.offsetWidth/2;
+    }
+  }
+
+  function renderToday(){
+    var r=rec(Y,M,D), isNow=(Y===ty&&M===tm&&D===td);
+    $('dtitle').textContent=(isNow?'오늘 ':'')+(M+1)+'월 '+D+'일 ('+WD[new Date(Y,M,D).getDay()]+') 기록';
+    ['swim','hang'].forEach(function(k){
+      document.querySelector('input[data-k="'+k+'"]').checked=!!r[k];
+    });
+    var ir=$('in-run'), ip=$('in-push');
+    if(document.activeElement!==ir) ir.value=r.run>0?fmt(r.run):'';
+    if(document.activeElement!==ip) ip.value=r.push>0?r.push:'';
+  }
+
+  function renderStats(){
+    var n=dim(Y,M), sw=0, hg=0, rt=0, pt=0, rd=0, pd=0, rb=0, pb=0, sd='', hd='';
+    for(var d=1; d<=n; d++){
+      var r=rec(Y,M,d);
+      if(r.swim) sw++; if(r.hang) hg++;
+      if(r.run>0){rt+=r.run; rd++; rb=Math.max(rb,r.run);}
+      if(r.push>0){pt+=r.push; pd++; pb=Math.max(pb,r.push);}
+      var c=d===D?' c':'';
+      sd+='<i class="'+(r.swim?'f':'')+c+'"></i>';
+      hd+='<i class="'+(r.hang?'f':'')+c+'"></i>';
+    }
+    var isNow=(Y===ty&&M===tm);
+    $('stitle').textContent=(isNow?'이번 달':(M+1)+'월')+' 며칠 했나요?';
+    $('swimN').textContent=sw; $('hangN').textContent=hg;
+    $('swimDots').innerHTML=sd; $('hangDots').innerHTML=hd;
+    $('runTot').textContent=fmt(rt); $('pushTot').textContent=pt;
+    $('runMeta').innerHTML=rd?rd+'일 달림<br>최고 '+fmt(rb)+'km':'기록 없음';
+    $('pushMeta').innerHTML=pd?pd+'일 운동<br>최고 '+pb+'개':'기록 없음';
+    $('mtitle').textContent=Y+'년 '+(M+1)+'월';
+    $('hello').textContent=isNow?'오늘도 한 걸음 더, 힘내요!':'지난 기록을 확인하고 수정할 수 있어요';
+    bars('run','runBars','runTip','km');
+    bars('push','pushBars','pushTip','개');
+    var ax='';
+    for(var i=1;i<=n;i++) ax+='<span>'+((i===1||i%5===0)?i:'')+'</span>';
+    $('axisR').innerHTML=ax; $('axisP').innerHTML=ax;
+  }
+
+  function bars(k,id,tipId,u){
+    var n=dim(Y,M), mx=0, vals=[];
+    for(var d=1; d<=n; d++){ var v=rec(Y,M,d)[k]||0; vals.push(v); if(v>mx) mx=v; }
+    var h='';
+    vals.forEach(function(v,i){
+      var d=i+1, pct=mx?Math.max(v/mx*100,v>0?4:0):0;
+      h+='<button class="bar'+(v>0?' v':'')+(d===D?' sel':'')+'" data-d="'+d+'" aria-label="'+d+'일 '+fmt(v)+u+'"><span style="height:'+(v>0?pct:2)+'%"></span></button>';
+    });
+    $(id).innerHTML=h;
+    var cur=vals[D-1]||0;
+    $(tipId).textContent=M+1+'월 '+D+'일: '+(cur?fmt(cur)+u:'기록 없음');
+  }
+
+  function render(scroll){ renderStrip(scroll); renderToday(); renderStats(); }
+
+  function pick(d){ D=d; render(true); }
+
+  function shift(delta){
+    M+=delta; if(M<0){M=11;Y--;} if(M>11){M=0;Y++;}
+    D=(Y===ty&&M===tm)?td:1;
+    render(true);
+  }
+
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('button'); if(!t) return;
+    if(t.id==='prev') return shift(-1);
+    if(t.id==='next') return shift(1);
+    if(t.classList.contains('day')||t.classList.contains('bar')) return pick(+t.dataset.d);
+    var k=t.dataset.k; if(!k) return;
+    var r=rec(Y,M,D);
+    var d=parseFloat(t.dataset.d), cur=r[k]||0;
+    var nv=Math.max(0,Math.round((cur+d)*10)/10);
+    if(k==='push') nv=Math.round(nv);
+    setRec(k,nv);
+  });
+
+  document.addEventListener('change',function(e){
+    var t=e.target;
+    if(t.type==='checkbox' && t.dataset.k) setRec(t.dataset.k,t.checked);
+  });
+
+  $('in-run').addEventListener('change',function(){
+    var v=parseFloat(this.value); setRec('run',isFinite(v)&&v>0?Math.round(v*10)/10:0);
+  });
+  $('in-push').addEventListener('change',function(){
+    var v=parseInt(this.value,10); setRec('push',isFinite(v)&&v>0?v:0);
+  });
+
+  render(true);
+})();
+</script>
+</body>
+</html>
